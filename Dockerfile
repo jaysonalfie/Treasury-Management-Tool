@@ -51,11 +51,41 @@ RUN chown -R www-data:www-data /var/www/html \
 
 # Create a startup script
 RUN echo '#!/bin/bash\n\
-# Run Laravel setup commands\n\
-php artisan config:cache\n\
-php artisan route:cache\n\
-php artisan view:cache\n\
-php artisan migrate --force\n\
+set -e\n\
+\n\
+echo "Starting Laravel setup..."\n\
+\n\
+# Debug: Print environment variables\n\
+echo "APP_ENV: $APP_ENV"\n\
+echo "APP_DEBUG: $APP_DEBUG"\n\
+echo "APP_KEY exists: $(if [ -n "$APP_KEY" ]; then echo "YES"; else echo "NO"; fi)"\n\
+\n\
+# Check if .env file exists, if not create from example\n\
+if [ ! -f .env ]; then\n\
+    echo "Creating .env file from .env.example"\n\
+    cp .env.example .env\n\
+fi\n\
+\n\
+# Set proper permissions\n\
+chown -R www-data:www-data /var/www/html\n\
+chmod -R 755 /var/www/html/storage\n\
+chmod -R 755 /var/www/html/bootstrap/cache\n\
+\n\
+# Clear any existing cache\n\
+echo "Clearing Laravel cache..."\n\
+php artisan config:clear || true\n\
+php artisan cache:clear || true\n\
+php artisan view:clear || true\n\
+php artisan route:clear || true\n\
+\n\
+# Test Laravel installation\n\
+echo "Testing Laravel..."\n\
+php artisan --version || echo "Laravel artisan not working"\n\
+\n\
+# Create a simple test file\n\
+echo "<?php echo '\''Laravel Test: '\'' . (class_exists('\''Illuminate\\Foundation\\Application'\'') ? '\''OK'\'' : '\''FAILED'\''); ?>" > /var/www/html/public/test.php\n\
+\n\
+echo "Laravel setup completed. Starting Apache..."\n\
 \n\
 # Start Apache\n\
 apache2-foreground' > /usr/local/bin/start.sh
