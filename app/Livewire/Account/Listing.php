@@ -24,10 +24,10 @@ class Listing extends Component
     {
         return Account::when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('item_models.name', 'like', '%' . $this->search . '%')
-                        ->orWhereHas('itemGroup', function ($subquery) {
-                            $subquery->where('name', 'like', '%' . $this->search . '%');
-                        });
+                    $q->where('name', 'like', '%' . $this->search . '%')
+                        ->orWhere('account_type', 'like', '%'. $this->search . '%')
+                        ->orWhere('currency', 'like', '%'. $this->search . '%');
+
                 });
             });
     }

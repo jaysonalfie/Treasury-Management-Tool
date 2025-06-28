@@ -73,6 +73,7 @@ class Create extends Component
                 'Amount' => $this->amount,
                 'transfer_date' => $this->transfer_date,
                 'description' => $this->description,
+                'status' => 1,
                 'created_by'=> auth()->id(),
                 'created_on'=> Carbon::now(),
 
