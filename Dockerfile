@@ -59,6 +59,9 @@ echo "Starting Laravel setup..."\n\
 echo "APP_ENV: $APP_ENV"\n\
 echo "APP_DEBUG: $APP_DEBUG"\n\
 echo "APP_KEY exists: $(if [ -n "$APP_KEY" ]; then echo "YES"; else echo "NO"; fi)"\n\
+echo "DB_HOST: $DB_HOST"\n\
+echo "DB_PORT: $DB_PORT"\n\
+echo "DB_DATABASE: $DB_DATABASE"\n\
 \n\
 # Check if .env file exists, if not create from example\n\
 if [ ! -f .env ]; then\n\
@@ -67,9 +70,19 @@ if [ ! -f .env ]; then\n\
 fi\n\
 \n\
 # Set proper permissions\n\
-chown -R www-data:www-data /var/www/html\n\
-chmod -R 755 /var/www/html/storage\n\
-chmod -R 755 /var/www/html/bootstrap/cache\n\
+APACHE_USER=$(ps -o user= -p 1 | grep -v root || echo "www-data")\n\
+chown -R $APACHE_USER:$APACHE_USER /var/www/html\n\
+chmod -R 775 /var/www/html/storage\n\
+chmod -R 775 /var/www/html/bootstrap/cache\n\
+mkdir -p /var/www/html/storage/logs\n\
+rm -f /var/www/html/storage/logs/laravel.log\n\
+touch /var/www/html/storage/logs/laravel.log\n\
+chown $APACHE_USER:$APACHE_USER /var/www/html/storage/logs/laravel.log\n\
+chmod 664 /var/www/html/storage/logs/laravel.log\n\
+\n\
+# Debug permissions\n\
+echo "Listing permissions for storage and logs..."\n\
+ls -ld /var/www/html/storage /var/www/html/storage/logs /var/www/html/bootstrap/cache /var/www/html/storage/logs/laravel.log\n\
 \n\
 # Clear any existing cache\n\
 echo "Clearing Laravel cache..."\n\
@@ -77,6 +90,14 @@ php artisan config:clear || true\n\
 php artisan cache:clear || true\n\
 php artisan view:clear || true\n\
 php artisan route:clear || true\n\
+\n\
+# Run migrations\n\
+echo "Running database migrations..."\n\
+php artisan migrate --force || echo "Migration failed"\n\
+\n\
+# Test database connection\n\
+echo "Testing database connection..."\n\
+php artisan db:monitor || echo "Database connection failed"\n\
 \n\
 # Test Laravel installation\n\
 echo "Testing Laravel..."\n\
