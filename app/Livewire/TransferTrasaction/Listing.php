@@ -24,16 +24,20 @@ class Listing extends Component
     ]);
     }
 
-    public function getTransaction(){
-
-         return TransferTransaction::with('accountFrom', 'accountTo')
-                ->when($this->search, function ($query) {
-                $query->where(function ($q) {
-                    $q->where('item_models.name', 'like', '%' . $this->search . '%')
-                        ->orWhereHas('itemGroup', function ($subquery) {
-                            $subquery->where('name', 'like', '%' . $this->search . '%');
-                        });
+ public function getTransaction()
+{
+    return TransferTransaction::with('accountFrom', 'accountTo', 'creator')
+        ->when($this->search, function ($query) {
+            $query->where(function ($q) {
+                // Search only in account names (both source and destination)
+                $q->whereHas('accountFrom', function ($subquery) {
+                    $subquery->where('name', 'like', '%' . $this->search . '%');
+                })
+                ->orWhereHas('accountTo', function ($subquery) {
+                    $subquery->where('name', 'like', '%' . $this->search . '%');
                 });
             });
-    }
+        });
+
+}
 }
