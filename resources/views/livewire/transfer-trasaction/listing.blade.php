@@ -105,7 +105,7 @@
                                     @foreach ($transfers as $transfer)
                                         <tr>
                                             <td
-                                                class="sticky left-0 z-30 bg-white px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                class="sticky md:static left-0 z-30 bg-white px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {{$transfer->id}}
                                             </td>
                                             <td
