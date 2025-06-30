@@ -59,9 +59,11 @@ echo "Starting Laravel setup..."\n\
 echo "APP_ENV: $APP_ENV"\n\
 echo "APP_DEBUG: $APP_DEBUG"\n\
 echo "APP_KEY exists: $(if [ -n "$APP_KEY" ]; then echo "YES"; else echo "NO"; fi)"\n\
+echo "DB_CONNECTION: $DB_CONNECTION"\n\
 echo "DB_HOST: $DB_HOST"\n\
 echo "DB_PORT: $DB_PORT"\n\
 echo "DB_DATABASE: $DB_DATABASE"\n\
+echo "DB_USERNAME: $DB_USERNAME"\n\
 \n\
 # Check if .env file exists, if not create from example\n\
 if [ ! -f .env ]; then\n\
@@ -91,13 +93,30 @@ php artisan cache:clear || true\n\
 php artisan view:clear || true\n\
 php artisan route:clear || true\n\
 \n\
-# Run migrations\n\
-echo "Running database migrations..."\n\
-php artisan migrate --force || echo "Migration failed"\n\
+# Wait for database to be ready (retry up to 5 times with 5-second delay)\n\
+echo "Waiting for database to be ready..."\n\
+for i in {1..5}; do\n\
+    php artisan db:monitor && break\n\
+    echo "Database not ready, retrying in 5 seconds ($i/5)..."\n\
+    sleep 5\n\
+done\n\
+if ! php artisan db:monitor; then\n\
+    echo "Database connection failed after retries."\n\
+    exit 1\n\
+fi\n\
+echo "Database connection successful."\n\
 \n\
-# Test database connection\n\
-echo "Testing database connection..."\n\
-php artisan db:monitor || echo "Database connection failed"\n\
+# Run migrations with detailed output\n\
+echo "Running database migrations..."\n\
+php artisan migrate --force --no-ansi -v || echo "Migration failed. Check logs for details."\n\
+\n\
+# List database tables to verify migrations\n\
+echo "Listing database tables..."\n\
+PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USERNAME" -d "$DB_DATABASE" -p "$DB_PORT" -c "\\dt" || echo "Failed to list tables."\n\
+\n\
+# Run seeders\n\
+echo "Running database seeders..."\n\
+php artisan db:seed --force --no-ansi -v || echo "Seeding failed. Check logs for details."\n\
 \n\
 # Test Laravel installation\n\
 echo "Testing Laravel..."\n\
