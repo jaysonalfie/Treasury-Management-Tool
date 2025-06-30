@@ -3,6 +3,6 @@
         <h1 class="font-medium text-base mr-auto">Accounts</h1>
     </div>
 
-    <livewire:accounts.create/>
+    <livewire:account.create/>
     
 </x-layouts.app>
