@@ -52,7 +52,8 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    // 'url' => env('APP_URL', 'http://localhost')
+    'url' => env('APP_URL', 'https://treasury-management-tool-1.onrender.com'),
 
     /*
     |--------------------------------------------------------------------------
