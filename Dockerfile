@@ -38,7 +38,7 @@ RUN composer install --no-dev --optimize-autoloader
 # Install NPM dependencies and build assets for production
 RUN if [ -f "package.json" ]; then \
     echo "Installing NPM dependencies and building assets..."; \
-    npm install && npm run production || echo "NPM build failed. Check package.json scripts."; \
+    npm install && npm run prod && npm run build || echo "NPM build failed. Check package.json scripts."; \
     ls -l public/build || echo "No public/build directory found."; \
     else echo "No package.json found, skipping NPM build."; \
 fi
