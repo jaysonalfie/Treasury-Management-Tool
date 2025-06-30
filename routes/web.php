@@ -23,8 +23,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/password', Password::class)->name('settings.password');
     Route::get('settings/appearance', Appearance::class)->name('settings.appearance');
 
-
-
     Route::get('accounts', [AccountController::class, 'index'])->name('accounts');
     Route::get('accounts/create', [AccountController::class, 'create'])->name('accounts.create');
     Route::get('accounts/edit/{id}', [AccountController::class, 'edit'])->name('accounts.edit');
